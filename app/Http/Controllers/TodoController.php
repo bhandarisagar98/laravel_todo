@@ -64,19 +64,30 @@ class TodoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $todo = Todos::find($id);
+        // Validate the request data
         $validatedData = $request->validate([
-            'todo' => 'required',
-            'description' => 'required',
+            'todo' => 'required|string|max:255',
+            'description' => 'required|string',
             'monetary_value' => 'nullable|numeric',
-            'success_probability' => 'nullable|numeric',
+            'success_probability' => 'nullable|in:High,Medium,Low',
             'priority' => 'required|in:High,Medium,Low',
         ]);
 
+        // Find the todo item to update
+        $todo = Todos::find($id);
+
+        // Check if the todo item exists
+        if (!$todo) {
+            return redirect()->back()->with('error', 'Todo item not found.');
+        }
+
+        // Update the todo item with the validated data
         $todo->update($validatedData);
 
-        return redirect()->to('/')->with('success', 'Todo item updated successfully!');
+        // Redirect back with success message
+        return redirect()->route('todo')->with('success', 'Todo item updated successfully!');
     }
+
 
     /**
      * Remove the specified resource from storage.
